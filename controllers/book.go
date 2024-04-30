@@ -139,39 +139,29 @@ func RemoveBook(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Failed to read body"})
 		return
 	}
-
-	// Extract the book name provided by the user
 	if user_data.BookName != "" {
 		bookName = strings.ToLower(user_data.BookName)
 	}
-
-	// Open the CSV file
 	file, err := os.OpenFile("./csv/regularUser.csv", os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to open CSV file"})
 		return
 	}
 	defer file.Close()
-
-	// Read the CSV file
 	reader := csv.NewReader(file)
 	rows, err := reader.ReadAll()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to read CSV file"})
 		return
 	}
-
-	// Filter out rows that match the given book name
 	filteredRows := make([][]string, 0)
 	for _, row := range rows {
-		if strings.ToLower(row[0]) != bookName { // Assuming the book name is in the first column
+		if strings.ToLower(row[0]) != bookName {
 			filteredRows = append(filteredRows, row)
 		}
 	}
-
-	// Write the filtered data back to the CSV file
-	file.Truncate(0) // Clear the file contents
-	file.Seek(0, 0)  // Rewind to the beginning of the file
+	file.Truncate(0) 
+	file.Seek(0, 0) 
 
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
